@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'AccountApp',
     'AppointmentApp',
 ]
+AUTH_USER_MODEL = 'AccountApp.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,7 +78,7 @@ WSGI_APPLICATION = 'yasminaProjet.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'mina.sqlite3',
     }
 }
 
