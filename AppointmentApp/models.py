@@ -2,29 +2,29 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+
 class Appointment(models.Model):
+    
     def clean(self):
         super().clean()
-        if self.appointment_date is None:
-            return
-        date_changed = True
-        if not self._state.adding:
-            old_date = Appointment.objects.filter(
-                pk=self.pk
-            ).values_list("appointment_date", flat=True).first()
-            date_changed = old_date != self.appointment_date
-            if date_changed and self.appointment_date <= timezone.now():
-                raise ValidationError({
-                    "appointment_date": "Le rendez-vous doit être futur."
-                })
+        modified_date = self._state.adding or (
+            not Appointment.objects.filter(
+                pk=self.pk,
+                appointment_date=self.appointment_date,
+            ).exists() )
+
+        if self.appointment_date and modified_date and ( self.appointment_date <= timezone.now() ):
+
+            raise ValidationError(
+                "Appointment date cannot be in the past.")
+
     class Meta:
         ordering = ["appointment_date"]
         constraints = [
         models.UniqueConstraint(
         fields=["doctor", "appointment_date"],
-        name="unique_doctor_appointment_date"
-        )
-        ]        
+        name="unique_doctor_appointment_date")]  
+
     class Status(models.TextChoices):
         PENDING = "PENDING", "En attente"
         CONFIRMED = "CONFIRMED", "Confirmé"
@@ -48,3 +48,4 @@ validators=[FileExtensionValidator(["pdf"])]
     patient = models.ForeignKey(
     "AccountApp.Patient", on_delete=models.CASCADE
     )
+    
